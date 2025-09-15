@@ -1,0 +1,15 @@
+{
+  "version": "0",
+  "id": "example-id-9012",
+  "detail-type": "GuardDuty Finding",
+  "source": "aws.guardduty",
+  "account": "123456789012",
+  "time": "2025-09-15T10:00:00Z",
+  "region": "us-east-1",
+  "resources": [],
+  "detail": {
+    "title": "UnauthorizedAccess:IAMUser/InstanceCredentialExfiltration",
+    "description": "An IAM user key was used from an unusual location",
+    "severity": 7
+  }
+}
