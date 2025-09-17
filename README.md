@@ -1,23 +1,62 @@
-# How I Automated Detection & Response for IAM Key Abuse
-(Terraform + Python + Lambda + Slack)
+# How I Automated Detection & Response for IAM Key Abuse  
 
-## Overview
-IAM access keys are critical for AWS operations but are vulnerable to abuse if compromised. Detecting unusual activity and responding quickly is essential.
+**(Terraform + Python + Lambda + Slack)**  
 
-This project demonstrates an automated system for detecting and responding to IAM key abuse across AWS accounts using Terraform, Python, Lambda, and Slack.
+## Overview  
 
-## Prerequisites: 
-- AWS Organization with at least 3 accounts (Management, Security, Workload)
-- Security account will host the detection Lambda
-- Cross-account IAM roles must be created to allow log access
+IAM access keys are critical for AWS operations but are vulnerable to abuse if compromised. Detecting unusual activity and responding quickly is essential.  
 
-## Step 0: Slack + Lambda Integration
-- Slack channel created: `#aws-incidents`
-- Incoming Webhook stored in Secrets Manager
-- Lambda function deployed to send alerts to Slack
-- Mock CloudTrail events tested successfully
+This project demonstrates an automated system for detecting and responding to IAM key abuse across AWS accounts using **Terraform, Python, AWS Lambda, and Slack**.  
+
+The setup follows AWS best practices by using a **multi-account AWS Organization**:  
+
+- **Management Account** → Billing + Org management (default).  
+- **Security Account** → Hosts the detection Lambda + cross-account roles.  
+- **Workload Account** → Simulates attacker activity + provides CloudTrail logs.  
+
+---
+
+## Prerequisites  
+
+- AWS Organization with at least **3 accounts** (Management, Security, Workload)  
+- Cross-account IAM roles configured (Security → Workload log access)  
+- Terraform installed (≥ v1.5)  
+- AWS CLI configured for each account  
+
+---
+
+## Architecture  
+
+```bash
+├── management-account/    # Org root (billing only)
+│   └── main.tf
+├── security-account/      # Detection & response logic
+│   ├── main.tf
+│   ├── lambda.tf
+│   └── variables.tf
+├── workload-account/      # Attack simulation + CloudTrail setup
+│   └── main.tf
+
+**Management Account → Default account created when enabling AWS Organizations.**
+
+**Security Account → Runs the Lambda detection engine.**
+
+**Workload Account → Used to simulate attacker activity and generate CloudTrail logs.**
+
+## Step 0: Slack + Lambda Integration 
+
+- Created Slack channel: #aws-incidents
+
+- Configured Incoming Webhook (stored in AWS Secrets Manager)
+
+- Deployed test Lambda function to send alerts → Slack
+
+- Mock CloudTrail events tested successfully ✅
 
 ## Next Steps
-- Implement IAM key abuse detection logic
-- Automate infrastructure using Terraform
-- Expand alerts to multi-account environments
+
+Implement IAM key abuse detection logic in Lambda
+
+Automate infrastructure with Terraform across accounts
+
+Expand alerts to multi-account environments
