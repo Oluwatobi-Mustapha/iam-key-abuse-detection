@@ -86,7 +86,7 @@ resource "aws_cloudwatch_event_permission" "org_accounts" {
 }
 ```
 ```
-**To deploy:**
+To deploy:
 cd terraform/security
 terraform init
 terraform plan
