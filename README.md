@@ -84,9 +84,9 @@ resource "aws_cloudwatch_event_permission" "org_accounts" {
   event_bus_name  = aws_cloudwatch_event_bus.central_bus.name
   statement_id    = "AllowWorkloadAccounts"
 }
-
-
-To deploy:
+```
+```
+**To deploy:**
 cd terraform/security
 terraform init
 terraform plan
