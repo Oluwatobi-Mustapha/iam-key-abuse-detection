@@ -37,26 +37,8 @@ The setup follows AWS best practices by using a **multi-account AWS Organization
 ├── workload-account/      # Attack simulation + CloudTrail setup
 │   └── main.tf
 
-**Management Account → Default account created when enabling AWS Organizations.**
 
-**Security Account → Runs the Lambda detection engine.**
 
-**Workload Account → Used to simulate attacker activity and generate CloudTrail logs.**
 
-## Step 0: Slack + Lambda Integration 
 
-- Created Slack channel: #aws-incidents
 
-- Configured Incoming Webhook (stored in AWS Secrets Manager)
-
-- Deployed test Lambda function to send alerts → Slack
-
-- Mock CloudTrail events tested successfully ✅
-
-## Next Steps
-
-Implement IAM key abuse detection logic in Lambda
-
-Automate infrastructure with Terraform across accounts
-
-Expand alerts to multi-account environments
