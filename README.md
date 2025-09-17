@@ -50,7 +50,39 @@ Expand alerts to multi-account environments
 
 ---
 
-## Architecture  
+
+## Step 1: Security Account Setup
+
+Inside `terraform/security/main.tf`, we defined the central EventBridge bus for cross-account IAM event forwarding.
+
+```hcl
+provider "aws" {
+  region  = "us-east-1"
+  profile = "security"
+}
+
+resource "aws_cloudwatch_event_bus" "central_bus" {
+  name = "org-security-bus"
+}
+
+Allow workload accounts to put events
+
+resource "aws_cloudwatch_event_permission" "org_accounts" {
+  principal       = "*"
+  action          = "events:PutEvents"
+  event_bus_name  = aws_cloudwatch_event_bus.central_bus.name
+  statement_id    = "AllowWorkloadAccounts"
+}
+
+
+To deploy:
+cd terraform/security
+terraform init
+terraform plan
+terraform apply
+
+
+**Architecture**  
 
 ```bash
 ├── management-account/    # Org root (billing only)
@@ -63,7 +95,7 @@ Expand alerts to multi-account environments
 │   └── main.tf
 
 
----
+
 
 
 
