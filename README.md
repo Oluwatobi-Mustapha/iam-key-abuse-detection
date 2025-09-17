@@ -6,6 +6,11 @@ IAM access keys are critical for AWS operations but are vulnerable to abuse if c
 
 This project demonstrates an automated system for detecting and responding to IAM key abuse across AWS accounts using Terraform, Python, Lambda, and Slack.
 
+## Prerequisites: 
+- AWS Organization with at least 3 accounts (Management, Security, Workload)
+- Security account will host the detection Lambda
+- Cross-account IAM roles must be created to allow log access
+
 ## Step 0: Slack + Lambda Integration
 - Slack channel created: `#aws-incidents`
 - Incoming Webhook stored in Secrets Manager
