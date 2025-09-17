@@ -163,4 +163,17 @@ resource "aws_iam_role_policy" "eventbridge_to_security_policy" {
 # Target that sends IAM activity events to the security bus
 resource "aws_cloudwatch_event_target" "forward_to_security" {
   rule           = aws_cloudwatch_event_rule.iam_activity.name
-  arn            = "arn:aws:ev
+  arn            = "arn:aws:events:us-east-1:222964727827:event-bus/org-security-bus"
+  event_bus_name = "default"
+  target_id      = "to-security"
+  role_arn       = aws_iam_role.eventbridge_to_security.arn
+}
+```
+
+### Apply Terraform
+```bash
+cd terraform/workload
+terraform init
+terraform plan
+terraform apply
+```
