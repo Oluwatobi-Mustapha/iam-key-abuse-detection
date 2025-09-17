@@ -93,45 +93,63 @@ terraform plan
 terraform apply
 ```
 
+## Step 2: Forward IAM Activity from Workload Account to Security Bus
+
+In this step, we configure the workload account (Workload2) to forward IAM activity events to the central EventBridge bus (`org-security-bus`) in the security account.
+
+### Terraform Code (`terraform/workload/main.tf`)
+```hcl
 provider "aws" {
   region  = "us-east-1"
-  profile = "workload"
+  profile = "Workload2"
 }
 
-# EventBridge Rule to capture IAM activity
+# EventBridge rule that matches IAM events
 resource "aws_cloudwatch_event_rule" "iam_activity" {
   name        = "iam-activity-forward"
-  description = "Forward IAM-related activity to org security bus"
-  event_pattern = jsonencode({
-    "source" : ["aws.iam"]
-  })
+  description = "Forward IAM activity to org-security-bus"
+  event_pattern = <<EOF
+{
+  "source": ["aws.iam"]
+}
+EOF
+
+  tags = {
+    Project     = "CloudSOC"
+    Environment = "workload2"
+    ManagedBy   = "Terraform"
+  }
 }
 
-# IAM Role assumed by EventBridge to put events in target bus
-resource "aws_iam_role" "eventbridge_forward_role" {
-  name = "EventBridgeForwardRole"
+# IAM role that EventBridge assumes to put events on the central bus
+resource "aws_iam_role" "eventbridge_to_security" {
+  name = "EventBridgeToSecurityRole"
 
   assume_role_policy = jsonencode({
-    Version = "2012-10-17"
+    Version   = "2012-10-17"
     Statement = [
       {
-        Effect = "Allow"
-        Principal = {
-          Service = "events.amazonaws.com"
-        }
-        Action = "sts:AssumeRole"
+        Effect    = "Allow"
+        Principal = { Service = "events.amazonaws.com" }
+        Action    = "sts:AssumeRole"
       }
     ]
   })
+
+  tags = {
+    Project     = "CloudSOC"
+    Environment = "workload2"
+    ManagedBy   = "Terraform"
+  }
 }
 
-# Inline policy granting permission to put events in the org bus
-resource "aws_iam_role_policy" "eventbridge_forward_policy" {
-  name = "EventBridgeForwardPolicy"
-  role = aws_iam_role.eventbridge_forward_role.id
+# IAM policy for EventBridge to forward events
+resource "aws_iam_role_policy" "eventbridge_to_security_policy" {
+  name = "EventBridgeToSecurityPolicy"
+  role = aws_iam_role.eventbridge_to_security.id
 
   policy = jsonencode({
-    Version = "2012-10-17"
+    Version   = "2012-10-17"
     Statement = [
       {
         Effect   = "Allow"
@@ -142,9 +160,7 @@ resource "aws_iam_role_policy" "eventbridge_forward_policy" {
   })
 }
 
-# Event Target: forward events to org-security-bus
+# Target that sends IAM activity events to the security bus
 resource "aws_cloudwatch_event_target" "forward_to_security" {
-  rule     = aws_cloudwatch_event_rule.iam_activity.name
-  arn      = "arn:aws:events:us-east-1:222964727827:event-bus/org-security-bus"
-  role_arn = aws_iam_role.eventbridge_forward_role.arn
-}
+  rule           = aws_cloudwatch_event_rule.iam_activity.name
+  arn            = "arn:aws:ev
